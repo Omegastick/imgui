@@ -1,4 +1,4 @@
-// dear imgui, v1.70 WIP
+// dear imgui, v1.71 WIP
 // (drawing and font code)
 
 /*
@@ -52,7 +52,7 @@ Index of this file:
 #endif
 
 // Clang/GCC warnings with -Weverything
-#ifdef __clang__
+#if defined(__clang__)
 #pragma clang diagnostic ignored "-Wold-style-cast"         // warning : use of old-style cast                              // yes, they are more terse.
 #pragma clang diagnostic ignored "-Wfloat-equal"            // warning : comparing floating point with == or != is unsafe   // storing and comparing against same constants ok.
 #pragma clang diagnostic ignored "-Wglobal-constructors"    // warning : declaration requires a global destructor           // similar to above, not sure what the exact difference is.
@@ -100,7 +100,7 @@ namespace IMGUI_STB_NAMESPACE
 #pragma warning (disable: 4456)                             // declaration of 'xx' hides previous local declaration
 #endif
 
-#ifdef __clang__
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wmissing-prototypes"
@@ -108,7 +108,7 @@ namespace IMGUI_STB_NAMESPACE
 #pragma clang diagnostic ignored "-Wcast-qual"              // warning : cast from 'const xxxx *' to 'xxx *' drops const qualifier //
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"              // warning: comparison is always true due to limited range of data type [-Wtype-limits]
 #pragma GCC diagnostic ignored "-Wcast-qual"                // warning: cast from type 'const xxxx *' to type 'xxxx *' casts away qualifiers
@@ -151,15 +151,15 @@ namespace IMGUI_STB_NAMESPACE
 #endif
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
-#ifdef __clang__
+#if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #pragma warning (pop)
 #endif
 
@@ -215,6 +215,8 @@ void ImGui::StyleColorsDark(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive]              = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
     colors[ImGuiCol_TabUnfocused]           = ImLerp(colors[ImGuiCol_Tab],          colors[ImGuiCol_TitleBg], 0.80f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImLerp(colors[ImGuiCol_TabActive],    colors[ImGuiCol_TitleBg], 0.40f);
+    colors[ImGuiCol_DockingPreview]         = colors[ImGuiCol_HeaderActive] * ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
+    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -270,6 +272,8 @@ void ImGui::StyleColorsClassic(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive]              = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
     colors[ImGuiCol_TabUnfocused]           = ImLerp(colors[ImGuiCol_Tab],          colors[ImGuiCol_TitleBg], 0.80f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImLerp(colors[ImGuiCol_TabActive],    colors[ImGuiCol_TitleBg], 0.40f);
+    colors[ImGuiCol_DockingPreview]         = colors[ImGuiCol_Header] * ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
+    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -326,6 +330,8 @@ void ImGui::StyleColorsLight(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive]              = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
     colors[ImGuiCol_TabUnfocused]           = ImLerp(colors[ImGuiCol_Tab],          colors[ImGuiCol_TitleBg], 0.80f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImLerp(colors[ImGuiCol_TabActive],    colors[ImGuiCol_TitleBg], 0.40f);
+    colors[ImGuiCol_DockingPreview]         = colors[ImGuiCol_Header] * ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
+    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -662,8 +668,8 @@ void ImDrawList::PrimQuadUV(const ImVec2& a, const ImVec2& b, const ImVec2& c, c
 
 // On AddPolyline() and AddConvexPolyFilled() we intentionally avoid using ImVec2 and superflous function calls to optimize debug/non-inlined builds.
 // Those macros expects l-values.
-#define IM_NORMALIZE2F_OVER_ZERO(VX,VY)                         { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = 1.0f / ImSqrt(d2); VX *= inv_len; VY *= inv_len; } }
-#define IM_NORMALIZE2F_OVER_EPSILON_CLAMP(VX,VY,EPS,INVLENMAX)  { float d2 = VX*VX + VY*VY; if (d2 > EPS)  { float inv_len = 1.0f / ImSqrt(d2); if (inv_len > INVLENMAX) inv_len = INVLENMAX; VX *= inv_len; VY *= inv_len; } }
+#define IM_NORMALIZE2F_OVER_ZERO(VX,VY)     { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = 1.0f / ImSqrt(d2); VX *= inv_len; VY *= inv_len; } }
+#define IM_FIXNORMAL2F(VX,VY)               { float d2 = VX*VX + VY*VY; if (d2 < 0.5f) d2 = 0.5f; float inv_lensq = 1.0f / d2; VX *= inv_lensq; VY *= inv_lensq; }
 
 // TODO: Thickness anti-aliased lines cap are missing their AA fringe.
 // We avoid using the ImVec2 math operators here to reduce cost to a minimum for debug/non-inlined builds.
@@ -725,7 +731,7 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
                 // Average normals
                 float dm_x = (temp_normals[i1].x + temp_normals[i2].x) * 0.5f;
                 float dm_y = (temp_normals[i1].y + temp_normals[i2].y) * 0.5f;
-                IM_NORMALIZE2F_OVER_EPSILON_CLAMP(dm_x, dm_y, 0.000001f, 100.0f)
+                IM_FIXNORMAL2F(dm_x, dm_y)
                 dm_x *= AA_SIZE;
                 dm_y *= AA_SIZE;
 
@@ -780,7 +786,7 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
                 // Average normals
                 float dm_x = (temp_normals[i1].x + temp_normals[i2].x) * 0.5f;
                 float dm_y = (temp_normals[i1].y + temp_normals[i2].y) * 0.5f;
-                IM_NORMALIZE2F_OVER_EPSILON_CLAMP(dm_x, dm_y, 0.000001f, 100.0f);
+                IM_FIXNORMAL2F(dm_x, dm_y);
                 float dm_out_x = dm_x * (half_inner_thickness + AA_SIZE);
                 float dm_out_y = dm_y * (half_inner_thickness + AA_SIZE);
                 float dm_in_x = dm_x * half_inner_thickness;
@@ -900,7 +906,7 @@ void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_coun
             const ImVec2& n1 = temp_normals[i1];
             float dm_x = (n0.x + n1.x) * 0.5f;
             float dm_y = (n0.y + n1.y) * 0.5f;
-            IM_NORMALIZE2F_OVER_EPSILON_CLAMP(dm_x, dm_y, 0.000001f, 100.0f);
+            IM_FIXNORMAL2F(dm_x, dm_y);
             dm_x *= AA_SIZE * 0.5f;
             dm_y *= AA_SIZE * 0.5f;
 
@@ -1779,7 +1785,7 @@ static void UnpackBoolVectorToFlatIndexList(const ImBoolVector* in, ImVector<int
     for (const int* it = it_begin; it < it_end; it++)
         if (int entries_32 = *it)
             for (int bit_n = 0; bit_n < 32; bit_n++)
-                if (entries_32 & (1 << bit_n))
+                if (entries_32 & (1u << bit_n))
                     out->push_back((int)((it - it_begin) << 5) + bit_n);
 }
 
@@ -2391,11 +2397,12 @@ void ImFontGlyphRangesBuilder::AddRanges(const ImWchar* ranges)
 
 void ImFontGlyphRangesBuilder::BuildRanges(ImVector<ImWchar>* out_ranges)
 {
-    for (int n = 0; n < 0x10000; n++)
+    int max_codepoint = 0x10000;
+    for (int n = 0; n < max_codepoint; n++)
         if (GetBit(n))
         {
             out_ranges->push_back((ImWchar)n);
-            while (n < 0x10000 && GetBit(n + 1))
+            while (n < max_codepoint - 1 && GetBit(n + 1))
                 n++;
             out_ranges->push_back((ImWchar)n);
         }
@@ -2956,12 +2963,14 @@ void ImFont::RenderText(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col
 // (progressively moved from imgui.cpp to here when they are redesigned to stop accessing ImGui global state)
 //-----------------------------------------------------------------------------
 // - RenderMouseCursor()
+// - RenderArrowDockMenu()
 // - RenderArrowPointingAt()
 // - RenderRectFilledRangeH()
+// - RenderRectFilledWithHole()
 // - RenderPixelEllipsis()
 //-----------------------------------------------------------------------------
 
-void ImGui::RenderMouseCursor(ImDrawList* draw_list, ImVec2 pos, float scale, ImGuiMouseCursor mouse_cursor)
+void ImGui::RenderMouseCursor(ImVec2 pos, float scale, ImGuiMouseCursor mouse_cursor)
 {
     if (mouse_cursor == ImGuiMouseCursor_None)
         return;
@@ -2971,18 +2980,29 @@ void ImGui::RenderMouseCursor(ImDrawList* draw_list, ImVec2 pos, float scale, Im
     const ImU32 col_border = IM_COL32(0, 0, 0, 255);          // Black
     const ImU32 col_fill   = IM_COL32(255, 255, 255, 255);    // White
 
-    ImFontAtlas* font_atlas = draw_list->_Data->Font->ContainerAtlas;
+    ImGuiContext& g = *GImGui;
+    ImFontAtlas* font_atlas = g.IO.Fonts;
     ImVec2 offset, size, uv[4];
     if (font_atlas->GetMouseCursorTexData(mouse_cursor, &offset, &size, &uv[0], &uv[2]))
     {
         pos -= offset;
         const ImTextureID tex_id = font_atlas->TexID;
-        draw_list->PushTextureID(tex_id);
-        draw_list->AddImage(tex_id, pos + ImVec2(1,0)*scale, pos + ImVec2(1,0)*scale + size*scale, uv[2], uv[3], col_shadow);
-        draw_list->AddImage(tex_id, pos + ImVec2(2,0)*scale, pos + ImVec2(2,0)*scale + size*scale, uv[2], uv[3], col_shadow);
-        draw_list->AddImage(tex_id, pos,                     pos + size*scale,                     uv[2], uv[3], col_border);
-        draw_list->AddImage(tex_id, pos,                     pos + size*scale,                     uv[0], uv[1], col_fill);
-        draw_list->PopTextureID();
+
+        // We need to account for the possibility of the mouse cursor straddling multiple viewports...
+        for (int viewport_n = 0; viewport_n < g.Viewports.Size; viewport_n++)
+        {
+            ImGuiViewportP* viewport = g.Viewports[viewport_n];
+            if (!viewport->GetRect().Overlaps(ImRect(pos, pos + ImVec2(size.x + 2, size.y + 2) * scale)))
+                continue;
+
+            ImDrawList* draw_list = GetForegroundDrawList(viewport);
+            draw_list->PushTextureID(tex_id);
+            draw_list->AddImage(tex_id, pos + ImVec2(1,0)*scale, pos + ImVec2(1,0)*scale + size*scale, uv[2], uv[3], col_shadow);
+            draw_list->AddImage(tex_id, pos + ImVec2(2,0)*scale, pos + ImVec2(2,0)*scale + size*scale, uv[2], uv[3], col_shadow);
+            draw_list->AddImage(tex_id, pos,                     pos + size*scale,                     uv[2], uv[3], col_border);
+            draw_list->AddImage(tex_id, pos,                     pos + size*scale,                     uv[0], uv[1], col_fill);
+            draw_list->PopTextureID();
+        }
     }
 }
 
@@ -2997,6 +3017,14 @@ void ImGui::RenderArrowPointingAt(ImDrawList* draw_list, ImVec2 pos, ImVec2 half
     case ImGuiDir_Down:  draw_list->AddTriangleFilled(ImVec2(pos.x - half_sz.x, pos.y - half_sz.y), ImVec2(pos.x + half_sz.x, pos.y - half_sz.y), pos, col); return;
     case ImGuiDir_None: case ImGuiDir_COUNT: break; // Fix warnings
     }
+}
+
+// This is less wide than RenderArrow() and we use in dock nodes instead of the regular RenderArrow() to denote a change of functionality,
+// and because the saved space means that the left-most tab label can stay at exactly the same position as the label of a loose window.
+void ImGui::RenderArrowDockMenu(ImDrawList* draw_list, ImVec2 p_min, float sz, ImU32 col)
+{
+    draw_list->AddRectFilled(p_min + ImVec2(sz * 0.10f, sz * 0.15f), p_min + ImVec2(sz * 0.70f, sz * 0.30f), col);
+    RenderArrowPointingAt(draw_list, p_min + ImVec2(sz * 0.40f, sz * 0.85f), ImVec2(sz * 0.30f, sz * 0.40f), ImGuiDir_Down, col);
 }
 
 static inline float ImAcos01(float x)
@@ -3066,6 +3094,24 @@ void ImGui::RenderRectFilledRangeH(ImDrawList* draw_list, const ImRect& rect, Im
         }
     }
     draw_list->PathFillConvex(col);
+}
+
+// For CTRL+TAB within a docking node we need to render the dimming background in 8 steps
+// (Because the root node renders the background in one shot, in order to avoid flickering when a child dock node is not submitted)
+void ImGui::RenderRectFilledWithHole(ImDrawList* draw_list, ImRect outer, ImRect inner, ImU32 col, float rounding)
+{
+    const bool fill_L = (inner.Min.x > outer.Min.x);
+    const bool fill_R = (inner.Max.x < outer.Max.x);
+    const bool fill_U = (inner.Min.y > outer.Min.y);
+    const bool fill_D = (inner.Max.y < outer.Max.y);
+    if (fill_L) draw_list->AddRectFilled(ImVec2(outer.Min.x, inner.Min.y), ImVec2(inner.Min.x, inner.Max.y), col, rounding, (fill_U ? 0 : ImDrawCornerFlags_TopLeft) | (fill_D ? 0 : ImDrawCornerFlags_BotLeft));
+    if (fill_R) draw_list->AddRectFilled(ImVec2(inner.Max.x, inner.Min.y), ImVec2(outer.Max.x, inner.Max.y), col, rounding, (fill_U ? 0 : ImDrawCornerFlags_TopRight) | (fill_D ? 0 : ImDrawCornerFlags_BotRight));
+    if (fill_U) draw_list->AddRectFilled(ImVec2(inner.Min.x, outer.Min.y), ImVec2(inner.Max.x, inner.Min.y), col, rounding, (fill_L ? 0 : ImDrawCornerFlags_TopLeft) | (fill_R ? 0 : ImDrawCornerFlags_TopRight));
+    if (fill_D) draw_list->AddRectFilled(ImVec2(inner.Min.x, inner.Max.y), ImVec2(inner.Max.x, outer.Max.y), col, rounding, (fill_L ? 0 : ImDrawCornerFlags_BotLeft) | (fill_R ? 0 : ImDrawCornerFlags_BotRight));
+    if (fill_L && fill_U) draw_list->AddRectFilled(ImVec2(outer.Min.x, outer.Min.y), ImVec2(inner.Min.x, inner.Min.y), col, rounding, ImDrawCornerFlags_TopLeft);
+    if (fill_R && fill_U) draw_list->AddRectFilled(ImVec2(inner.Max.x, outer.Min.y), ImVec2(outer.Max.x, inner.Min.y), col, rounding, ImDrawCornerFlags_TopRight);
+    if (fill_L && fill_D) draw_list->AddRectFilled(ImVec2(outer.Min.x, inner.Max.y), ImVec2(inner.Min.x, outer.Max.y), col, rounding, ImDrawCornerFlags_BotLeft);
+    if (fill_R && fill_D) draw_list->AddRectFilled(ImVec2(inner.Max.x, inner.Max.y), ImVec2(outer.Max.x, outer.Max.y), col, rounding, ImDrawCornerFlags_BotRight);
 }
 
 // FIXME: Rendering an ellipsis "..." is a surprisingly tricky problem for us... we cannot rely on font glyph having it,
