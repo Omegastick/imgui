@@ -706,11 +706,31 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
             {
                 const int i2 = (i1+1) == points_count ? 0 : i1+1;
                 unsigned int idx2 = (i1+1) == points_count ? _VtxCurrentIdx : idx1+4;
-
                 // Average normals
                 float dm_x = (temp_normals[i1].x + temp_normals[i2].x) * 0.5f;
                 float dm_y = (temp_normals[i1].y + temp_normals[i2].y) * 0.5f;
-                IM_FIXNORMAL2F(dm_x, dm_y);
+
+                // Direction of first edge
+                float v0x = -temp_normals[i1].y;
+                float v0y = temp_normals[i1].x;
+
+                // Project direction of first edge on second edge normal
+                if (closed || i2 != count)
+                {
+                    float dot = v0x * temp_normals[i2].x + v0y * temp_normals[i2].y;
+                    // Negative direction of 2nd edge
+                    float v1x = temp_normals[i2].y;
+                    float v1y = -temp_normals[i2].x;
+
+                    // Scale 
+                    dm_x = (v0x + v1x) / dot;
+                    dm_y = (v0y + v1y) / dot;
+                }
+                else
+                {
+                    IM_FIXNORMAL2F(dm_x, dm_y);
+                }
+                            
                 float dm_out_x = dm_x * (half_inner_thickness + AA_SIZE);
                 float dm_out_y = dm_y * (half_inner_thickness + AA_SIZE);
                 float dm_in_x = dm_x * half_inner_thickness;
